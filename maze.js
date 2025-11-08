@@ -131,9 +131,41 @@ class Cell {
         let neighbors = [];
 
         // TODO: Tjek om naboen nord for, hvis den findes, har en væg
+        if(this.y > 0) {
+            const nord_x = this.x
+            const nord_y = this.y - 1;
+            const nord_nabo = grid[nord_x][nord_y];
+            if(!this.walls.top && !nord_nabo.walls.bottom) {
+                neighbors.push(nord_nabo);
+            }
+        }
         // TODO: Tjek om naboen til venstre, hvis den findes, har en væg
+        if(this.x > 0) {
+            const venstre_x = this.x - 1;
+            const venstre_y = this.y;
+            const venstre_nabo = grid[venstre_x][venstre_y]
+            if(!this.walls.left && !venstre_nabo.walls.right) {
+                neighbors.push(venstre_nabo);
+            }
+        }
         // TODO: Tjek om naboen syd for, hvis den findes, har en væg
+        if(this.y < grid[0].length - 1) {
+            const syd_x = this.x
+            const syd_y = this.y + 1;
+            const syd_nabo = grid[syd_x][syd_y];
+            if(!this.walls.bottom && !syd_nabo.walls.top) {
+                neighbors.push(syd_nabo);
+            }
+        }
         // TODO: Tjek om naboen til højre, hvis den findes, har en væg
+        if(this.x < grid.length - 1) {
+            const højre_x = this.x + 1;
+            const højre_y = this.y;
+            const højre_nabo = grid[højre_x][højre_y]
+            if(!this.walls.right && !højre_nabo.walls.left) {
+                neighbors.push(højre_nabo);
+            }
+        }
 
         return neighbors;
     }
@@ -236,6 +268,29 @@ class MazeSolver {
         const endCell = this.maze.grid[endX][endY];
 
         // TODO: Lav `findPath()` vha. enten DFS (stak) eller BFS (queue)
+        // stak
+        let stak = [];
+        stak.push(startCell);
+        startCell.visited = true;
+
+        while(stak.length > 0) {
+            const currentCell = stak.pop();
+
+            if(currentCell.equals(endCell)) {
+                return this.reconstructPath(startCell, endCell);
+            }
+
+            const neighbors = currentCell.connectedNeighbors(this.maze.grid);
+
+            for(const neighbor of neighbors) {
+                if (!neighbor.visited) {
+                    neighbor.visited = true;
+                    neighbor.parent = currentCell;
+                    stak.push(neighbor);
+                }
+            }
+
+        }
 
         return null;
     }
@@ -289,7 +344,7 @@ document.addEventListener('DOMContentLoaded', () => {
     const endX = maze.cols - 1;
     const endY = maze.rows - 1;
 
-    solver.findPath(startX, startY, endX, endY);
+    const path = solver.findPath(startX, startY, endX, endY);
     solver.drawPathStepwise(path, '#ff0000', 20);
 
     console.log(maze);
